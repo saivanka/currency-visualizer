@@ -16,6 +16,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    networks:
+      - currency-net
 
   backend:
     build: ./backend
@@ -27,6 +29,8 @@ services:
         condition: service_healthy
     ports:
       - "8000:8000"
+    networks:
+      - currency-net
 
   frontend:
     build:
@@ -35,9 +39,16 @@ services:
         VITE_API_URL: /api
     restart: unless-stopped
     depends_on:
-      - backend
+      backend:
+        condition: service_started
     ports:
-      - "80:80"
+      - "8080:80"
+    networks:
+      - currency-net
+
+networks:
+  currency-net:
+    driver: bridge
 
 volumes:
   db_data:

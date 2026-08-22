@@ -29,10 +29,10 @@ async function request<T>(path: string): Promise<T> {
 }
 
 export const api = {
-  latest: () => request<LatestRate>("/api/rate/latest"),
-  history: (days = 30) => request<RatePoint[]>(`/api/rate/history?days=${days}`),
+  latest: () => request<LatestRate>("/rate/latest"),
+  history: (days = 30) => request<RatePoint[]>(`/rate/history?days=${days}`),
   convert: (amount: number, from: string, to: string) =>
     request<ConvertResult>(
-      `/api/convert?amount=${amount}&from=${from}&to=${to}`
+      `/convert?amount=${amount}&from=${from}&to=${to}`
     ),
 }
