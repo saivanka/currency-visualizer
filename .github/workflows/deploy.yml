@@ -1,8 +1,11 @@
 name: Build and Deploy to EC2
 
+# PAUSED as an automatic deploy (Oct 2026): the live site now runs on the
+# free S3 static deployment (see deploy-s3.yml). This EC2 pipeline is kept
+# for manual use only - it needs repo secrets EC2_HOST, EC2_USER and
+# EC2_SSH_KEY plus a running EC2 instance, none of which are currently set.
+# Run it from the Actions tab (workflow_dispatch) after restoring those.
 on:
-  push:
-    branches: [main]
   workflow_dispatch: {}
 
 env:
