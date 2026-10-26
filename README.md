@@ -78,3 +78,32 @@ currency-visualizer/
 ## Why this project matters
 
 It is a complete, honest DevOps loop: code → container → registry → cloud host → rollback plan. No step is manual, and every step is documented in this repo.
+
+## S3 static deployment (free, live)
+
+S3 can only host static files, so the live demo runs the frontend in
+**static mode**: the browser calls the same free rate API the backend uses
+(open.er-api.com) directly, and the chart's history is kept locally in the
+browser (one real point per day, starting from your first visit). The
+FastAPI + Postgres backend stays in this repo for the full Docker/EC2
+setup below — it is simply not needed to run the demo, and S3 hosting for
+this traffic costs effectively $0 (pennies/month at most, covered by
+account credits).
+
+One-time setup:
+
+1. Create an S3 bucket in `us-east-1`, turn **off** "Block all public
+   access", enable **Static website hosting** (index document:
+   `index.html`), and add a bucket policy allowing public `s3:GetObject`.
+2. Build and upload:
+   `cd frontend && VITE_STATIC_MODE=true npm run build`, then upload the
+   contents of `dist/` to the bucket. Your URL is the bucket's website
+   endpoint.
+3. For automatic deploys, add repo secrets `AWS_ACCESS_KEY_ID`,
+   `AWS_SECRET_ACCESS_KEY` and `S3_BUCKET`, then run the
+   **Deploy Frontend to S3 (Static)** workflow from the Actions tab
+   (`.github/workflows/deploy-s3.yml`, manual trigger).
+
+The EC2 workflow (`deploy.yml`) is paused to manual-only: it needs
+`EC2_HOST` / `EC2_USER` / `EC2_SSH_KEY` secrets and a running instance,
+and failed on every push while those were missing.
