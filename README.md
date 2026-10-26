@@ -1,20 +1,22 @@
 # 💱 Currency Visualizer
 
-A full-stack web app that visualizes current currency exchange rates — React frontend, FastAPI + PostgreSQL backend — with a complete containerized CI/CD pipeline that deploys to AWS EC2.
+A full-stack web app that visualizes USD ⇄ INR exchange rates — React frontend, FastAPI + PostgreSQL backend — containerized with Docker and deployed through GitHub Actions. The live demo runs free on AWS S3; the full stack also deploys to AWS EC2.
 
 ![Python](https://img.shields.io/badge/Python-FastAPI-009688?logo=fastapi&logoColor=white)
 ![React](https://img.shields.io/badge/React-Vite-61DAFB?logo=react&logoColor=black)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white)
-![AWS](https://img.shields.io/badge/Deploy-AWS%20EC2-FF9900?logo=amazonec2&logoColor=white)
+![AWS](https://img.shields.io/badge/Live-AWS%20S3-FF9900?logo=amazons3&logoColor=white)
+
+**🔴 Live demo: [currency-visualizer-saivanka.s3-website-us-east-1.amazonaws.com](http://currency-visualizer-saivanka.s3-website-us-east-1.amazonaws.com)** — no server, no sign-up, just open it.
 
 ## What it does
 
 - Visualizes current currency exchange rates in the browser
 - FastAPI backend serves rate data backed by PostgreSQL
 - React + Vite frontend for a fast, responsive UI
-- Ships as Docker containers and deploys automatically to EC2
+- Live demo runs as a static site on AWS S3 (free); the full stack also ships as Docker containers for EC2
 
 ## Architecture
 
@@ -38,7 +40,7 @@ A full-stack web app that visualizes current currency exchange rates — React f
 | Database | PostgreSQL |
 | Containers | Docker, Docker Compose |
 | CI/CD | GitHub Actions, GitHub Container Registry (GHCR) |
-| Hosting | AWS EC2 |
+| Hosting | AWS S3 (live demo) · AWS EC2 (full stack) |
 
 ## Run it locally
 
@@ -46,14 +48,21 @@ A full-stack web app that visualizes current currency exchange rates — React f
 # Clone and start everything with Docker Compose
 git clone https://github.com/saivanka/currency-visualizer.git
 cd currency-visualizer
+cp .env.example .env   # then fill in your own values — never commit .env
 docker compose up --build
 ```
+
+Environment values (`POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`)
+live in **GitHub Secrets** for CI/CD and in your local `.env` file for
+Docker Compose. `.env` is git-ignored; only `.env.example` (placeholders)
+is committed.
 
 Then open the frontend in your browser and explore live currency rates.
 
 ## CI/CD pipeline
 
-Every push to the main branch triggers the GitHub Actions workflow:
+The EC2 pipeline (`.github/workflows/deploy.yml`, currently manual-only —
+see the S3 section below) builds and deploys the full stack:
 
 1. **Build** — backend and frontend Docker images are built
 2. **Publish** — images are pushed to GitHub Container Registry (GHCR)
