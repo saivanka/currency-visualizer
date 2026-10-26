@@ -10,7 +10,7 @@ function App() {
             USD <span className="text-primary">⇄</span> INR Visualizer
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Daily dollar-to-rupee tracking, powered by FastAPI + Postgres.
+            Daily dollar-to-rupee tracking with live exchange-rate data.
           </p>
         </header>
 
