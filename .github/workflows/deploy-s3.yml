@@ -1,0 +1,58 @@
+name: Deploy Frontend to S3 (Static)
+
+# Free static deployment: builds the React frontend in "static mode"
+# (VITE_STATIC_MODE=true — the browser calls the free rate API directly,
+# no backend server needed) and syncs dist/ to an S3 bucket configured
+# for static website hosting.
+#
+# One-time setup (see README "S3 static deployment" section):
+#   1. Create the S3 bucket with static website hosting + public read.
+#   2. Add repo secrets: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+#      (from the "github-actions" IAM user) and S3_BUCKET (bucket name).
+#
+# Manual-only until those secrets exist, so pushes never show a false
+# failure. After setup, run from the Actions tab.
+
+on:
+  workflow_dispatch: {}
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  deploy-s3:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build frontend (static mode)
+        working-directory: frontend
+        env:
+          VITE_STATIC_MODE: "true"
+        run: |
+          npm ci
+          npm run build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Sync dist to S3
+        run: |
+          aws s3 sync frontend/dist "s3://${{ secrets.S3_BUCKET }}" --delete \
+            --exclude "assets/*"
+          # Hashed assets get long-lived caching; index.html stays fresh.
+          aws s3 sync frontend/dist "s3://${{ secrets.S3_BUCKET }}" \
+            --exclude "*" --include "assets/*" \
+            --cache-control "public, max-age=31536000, immutable"
